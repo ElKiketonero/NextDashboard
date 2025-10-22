@@ -31,10 +31,20 @@ export async function createInvoice(formData: FormData) {
 
   console.log("Creating invoice with data:", { customerId, amount, status });
 
-  await sql`
-    INSERT INTO invoices (customer_id, amount, status, date)
-    VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
-  `;
+  try {
+    await sql`
+      INSERT INTO invoices (customer_id, amount, status, date)
+      VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
+    `;
+  } catch (error) {
+    console.log("Failed to create invoice:", {
+      customerId,
+      amountInCents,
+      status,
+      date,
+    });
+    console.error("Error creating invoice:", error);
+  }
 
   revalidatePath("/dashboard/invoices");
   redirect("/dashboard/invoices");
@@ -49,17 +59,28 @@ export async function updateInvoice(id: string, formData: FormData) {
 
   const amountInCents = amount * 100;
 
-  await sql`
+  try {
+    await sql`
     UPDATE invoices
     SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
     WHERE id = ${id}
   `;
+  } catch (error) {
+    console.log("Failed to update invoice:", {
+      id,
+      customerId,
+      amountInCents,
+      status,
+    });
+    console.error("Error updating invoice:", error);
+  }
 
   revalidatePath("/dashboard/invoices");
   redirect("/dashboard/invoices");
 }
 
 export async function deleteInvoice(id: string) {
+  throw new Error("Delete invoice not implemented yet");
   await sql`DELETE FROM invoices WHERE id = ${id}`;
   revalidatePath("/dashboard/invoices");
 }
